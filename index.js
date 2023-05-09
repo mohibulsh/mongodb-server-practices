@@ -25,7 +25,29 @@ async function run() {
     await client.connect();
     const database = client.db("usersDB");
     const userCollection = database.collection("userCollection");
-   
+    //update 
+    app.get('/users/:id', async(req,res)=>{
+      const id = req.params.id;
+      const query ={_id: new ObjectId(id)}
+      const user =await userCollection.findOne(query)
+      console.log('hit the server',user)
+      res.send(user)
+    })
+    app.put('/users/:id',async(req,res)=>{
+      const id =req.params.id;
+      const user =req.body;
+      console.log(user,'there is update user')
+      const filter = {_id : new ObjectId(id)}
+      const options = { upsert : true};
+      const updateUser = {
+        $set:{
+          name:user.name,
+          email:user.email
+        }
+      }
+      const result =await userCollection.updateOne(filter,updateUser,options)
+      res.send(result)
+    })
     app.get('/users',async(req,res)=>{
         const cursor = userCollection.find();
         const result = await cursor.toArray();
